@@ -2,23 +2,25 @@
 Contributors: #### Your wordpress.org Username ####
 Donate link: #### donate link ####
 Tags: #### donate link ####
-Requires at least: 3.8
-Tested up to: 4.0
+Requires at least: 4.0
+Tested up to: 4.1
 Stable tag: trunk
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
-#### Short Description ####
+Upload and edit SVG files in WordPress.
 
 == Description ==
 
-#### Long Description ####
+Upload and edit SVG files in WordPress.
 
 
 
 == Installation ==
 
 Follow the standard [WordPress plugin installation procedere](http://codex.wordpress.org/Managing_Plugins).
+
+Pray to your prefered superior entity.
 
 == Frequently asked questions ==
 
