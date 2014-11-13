@@ -57,6 +57,7 @@ class SvgSupport {
 		add_filter( 'wp_generate_attachment_metadata' , array( &$this , 'svg_generate_metadata' ) , 10 , 2 );
 		add_filter( 'wp_get_attachment_metadata' , array( &$this , 'svg_get_attachment_metadata' ) , 10 , 2 );
 		add_filter( 'file_is_displayable_image' , array( &$this , 'svg_is_displayable_image' ) , 10 , 2 );
+		
 		// hide unsuported features
 		add_filter( 'admin_body_class' , array( &$this , 'admin_body_class' ) );
 		add_action( 'admin_print_scripts' , array( &$this , 'admin_print_scripts' ) );
@@ -67,7 +68,6 @@ class SvgSupport {
 	}
 	function admin_print_scripts(){
 		?><style type="text/css">
-			.imgedit-scale-warn,
 			.post-type-attachment.edit-attachment-svg .imgedit-flipv,
 			.post-type-attachment.edit-attachment-svg .imgedit-fliph,
 			.post-type-attachment.edit-attachment-svg .imgedit-rleft,
