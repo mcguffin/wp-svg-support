@@ -66,6 +66,7 @@ class SvgSupport {
 		register_deactivation_hook( __FILE__ , array( __CLASS__ , 'deactivate' ) );
 		register_uninstall_hook( __FILE__ , array( __CLASS__ , 'uninstall' ) );
 	}
+
 	function admin_print_scripts(){
 		?><style type="text/css">
 			.post-type-attachment.edit-attachment-svg .imgedit-flipv,
