@@ -50,7 +50,11 @@ class WPSVG_Image_Editor_SVG extends WP_Image_Editor {
 		return new WP_Error( 'image_resize_error', __('Image resize failed.'), $this->xml_document );
 	}
 	protected function _resize( $max_w, $max_h, $crop = false ) {
+		// allow upscale
+		add_filter( 'image_resize_dimensions' , array( &$this , 'image_resize_dimensions' ) , 10 , 6 );
 		$dims = image_resize_dimensions( $this->size['width'], $this->size['height'], $max_w, $max_h, $crop );
+		remove_filter( 'image_resize_dimensions' , array( &$this , 'image_resize_dimensions' ) , 10 );
+
 		if ( ! $dims ) {
 			return new WP_Error( 'error_getting_dimensions', __('Could not calculate resized image dimensions'), $this->file );
 		}
@@ -167,7 +171,7 @@ class WPSVG_Image_Editor_SVG extends WP_Image_Editor {
 		$this->xml_document[0]['width']  = ( ! is_null($dst_w) ? $dst_w : $src_w ) . 'px';
 		$this->xml_document[0]['height'] = ( ! is_null($dst_h) ? $dst_h : $src_h )  . 'px';
 		
-		$this->_resize( $original_size['width'] , $original_size['height'] , false );
+		$this->_resize( $dst_w , $dst_h , false );
 
 		$this->update_size( );
 
@@ -420,6 +424,84 @@ class WPSVG_Image_Editor_SVG extends WP_Image_Editor {
 			'height'    => $this->size['height'],
 			'mime-type' => $mime_type,
 		);
+	}
+	
+	function image_resize_dimensions( $null , $orig_w, $orig_h, $dest_w, $dest_h, $crop = false ) {
+		// BEGIN copy-paste from wp-includes/media.php function image_resize_dimensions()
+		if ($orig_w <= 0 || $orig_h <= 0)
+			return false;
+		// at least one of dest_w or dest_h must be specific
+		if ($dest_w <= 0 && $dest_h <= 0)
+			return false;
+		
+		// omitted apply_filters( 'image_resize_dimensions', ... ) for sure ...
+		
+		if ( $crop ) {
+			// crop the largest possible portion of the original image that we can size to $dest_w x $dest_h
+			$aspect_ratio = $orig_w / $orig_h;
+			// no min!
+			$new_w = $dest_w;
+			$new_h = $dest_h;
+
+			if ( !$new_w ) {
+				$new_w = intval($new_h * $aspect_ratio);
+			}
+
+			if ( !$new_h ) {
+				$new_h = intval($new_w / $aspect_ratio);
+			}
+
+			$size_ratio = max($new_w / $orig_w, $new_h / $orig_h);
+
+			$crop_w = round($new_w / $size_ratio);
+			$crop_h = round($new_h / $size_ratio);
+
+			if ( ! is_array( $crop ) || count( $crop ) !== 2 ) {
+				$crop = array( 'center', 'center' );
+			}
+
+			list( $x, $y ) = $crop;
+
+			if ( 'left' === $x ) {
+				$s_x = 0;
+			} elseif ( 'right' === $x ) {
+				$s_x = $orig_w - $crop_w;
+			} else {
+				$s_x = floor( ( $orig_w - $crop_w ) / 2 );
+			}
+
+			if ( 'top' === $y ) {
+				$s_y = 0;
+			} elseif ( 'bottom' === $y ) {
+				$s_y = $orig_h - $crop_h;
+			} else {
+				$s_y = floor( ( $orig_h - $crop_h ) / 2 );
+			}
+		} else {
+			// don't crop, just resize using $dest_w x $dest_h as a maximum bounding box
+			$crop_w = $orig_w;
+			$crop_h = $orig_h;
+
+			$s_x = 0;
+			$s_y = 0;
+			
+			$factor = min( $dest_w / $orig_w , $dest_h / $orig_h );
+
+			$new_w = $orig_w * $factor;
+			$new_h = $orig_h * $factor;
+//			list( $new_w, $new_h ) = wp_constrain_dimensions( $orig_w, $orig_h, $dest_w, $dest_h );
+		}
+
+		// if the resulting image would be the same size or larger we don't want to resize it
+		// NOPE!
+// 		if ( $new_w >= $orig_w && $new_h >= $orig_h )
+// 			return false;
+
+		// the return array matches the parameters to imagecopyresampled()
+		// int dst_x, int dst_y, int src_x, int src_y, int dst_w, int dst_h, int src_w, int src_h
+		$return = array( 0, 0, (int) $s_x, (int) $s_y, (int) $new_w, (int) $new_h, (int) $crop_w, (int) $crop_h );
+		return $return;
+		// END copy-paste from wp-includes/media.php function image_resize_dimensions()
 	}
 
 /*
