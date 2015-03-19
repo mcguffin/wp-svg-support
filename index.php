@@ -50,7 +50,7 @@ class SvgSupport {
 	 */
 	private function __construct() {
 		add_action( 'plugins_loaded' , array( &$this , 'load_textdomain' ) );
-		add_action( 'init' , array( &$this , 'init' ) );
+// 		add_action( 'init' , array( &$this , 'init' ) );
 		
 		add_filter( 'wp_image_editors' , array( &$this , 'add_svg_editor' ) );
 		add_filter( 'mime_types', array( &$this , 'allow_svg_mime_type' ) );
@@ -62,11 +62,16 @@ class SvgSupport {
 		add_filter( 'admin_body_class' , array( &$this , 'admin_body_class' ) );
 		add_action( 'admin_print_scripts' , array( &$this , 'admin_print_scripts' ) );
 		
-		register_activation_hook( __FILE__ , array( __CLASS__ , 'activate' ) );
-		register_deactivation_hook( __FILE__ , array( __CLASS__ , 'deactivate' ) );
-		register_uninstall_hook( __FILE__ , array( __CLASS__ , 'uninstall' ) );
+// 		register_activation_hook( __FILE__ , array( __CLASS__ , 'activate' ) );
+// 		register_deactivation_hook( __FILE__ , array( __CLASS__ , 'deactivate' ) );
+// 		register_uninstall_hook( __FILE__ , array( __CLASS__ , 'uninstall' ) );
 	}
 
+	/**
+	 * Hide unsupported image editor buttons
+	 *
+	 * @action 'admin_print_scripts'
+	 */
 	function admin_print_scripts(){
 		?><style type="text/css">
 			.post-type-attachment.edit-attachment-svg .imgedit-flipv,
@@ -77,12 +82,18 @@ class SvgSupport {
 			}
 		</style><?php
 	}
+	/**
+	 * @filter 'admin_body_class'
+	 */
 	function admin_body_class( $class = '' ) {
 		if ( false !== ($post = get_post() ) && 'image/svg+xml' == $post->post_mime_type )
 			$class .= ' edit-attachment-svg';
 		return $class;
 	}
 	
+	/**
+	 * @filter 'wp_get_attachment_metadata'
+	 */
 	function svg_get_attachment_metadata( $data , $post_id ) {
 		if ( ! $data ) {
 			if ( !$post = get_post( $post_id ) )
@@ -100,8 +111,11 @@ class SvgSupport {
 	function svg_is_displayable_image( $result , $path ) {
 		return pathinfo( $path , PATHINFO_EXTENSION ) == 'svg' || $result;
 	}
+	
 	/**
 	 * Adds SVG Editor Class
+	 *
+	 * @filter 'wp_image_editors'
 	 */
 	function add_svg_editor( $editors ) {
 		require_once plugin_dir_path(__FILE__) . '/include/class-wpsvg-image-editor-svg.php';
@@ -111,6 +125,8 @@ class SvgSupport {
 	} 
 	/**
 	 * Allow SVG uploads
+	 *
+	 * @filter 'mime_types'
 	 */
 	function allow_svg_mime_type($mimes) {
 		if ( current_user_can( 'unfiltered_upload' ) )
@@ -121,6 +137,8 @@ class SvgSupport {
 	
 	/**
 	 * Generate Metadata for SVG Uplaods
+	 *
+	 * @filter 'wp_generate_attachment_metadata'
 	 */
 	function svg_generate_metadata( $metadata , $attachment_id ) {
 		$post = get_post($attachment_id);
@@ -170,14 +188,16 @@ class SvgSupport {
 
 	/**
 	 * Load text domain
+	 *
+	 * @action 'plugins_loaded'
 	 */
 	public function load_textdomain() {
 		load_plugin_textdomain( 'wp-svg-support' , false, dirname( plugin_basename( __FILE__ ) ) . '/languages/' );
 	}
 	/**
 	 * Init hook.
-	 * 
-	 *  - Register assets
+	 *
+	 * @action 'init'
 	 */
 	function init() {
 	}
@@ -187,25 +207,17 @@ class SvgSupport {
 	/**
 	 *	Fired on plugin activation
 	 */
-	public static function activate() {
-	
-	
-	}
+	public static function activate() { }
 
 	/**
 	 *	Fired on plugin deactivation
 	 */
-	public static function deactivate() {
-	}
+	public static function deactivate() { }
+
 	/**
-	 *
+	 *	Fired on plugin uninstall
 	 */
-	public static function uninstall(){
-
-
-
-
-	}
+	public static function uninstall(){ }
 
 }
 SvgSupport::get_instance();
