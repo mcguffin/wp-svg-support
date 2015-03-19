@@ -113,7 +113,8 @@ class SvgSupport {
 	 * Allow SVG uploads
 	 */
 	function allow_svg_mime_type($mimes) {
-		$mimes['svg'] = 'image/svg+xml';
+		if ( current_user_can( 'unfiltered_upload' ) )
+			$mimes['svg'] = 'image/svg+xml';
 		return $mimes;
 	}
 	
