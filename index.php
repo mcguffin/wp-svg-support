@@ -86,7 +86,7 @@ class SvgSupport {
 	 * @filter 'admin_body_class'
 	 */
 	function admin_body_class( $class = '' ) {
-		if ( false !== ($post = get_post() ) && 'image/svg+xml' == $post->post_mime_type )
+		if ( ( $post = get_post() ) && 'image/svg+xml' == $post->post_mime_type )
 			$class .= ' edit-attachment-svg';
 		return $class;
 	}
