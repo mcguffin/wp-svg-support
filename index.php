@@ -50,8 +50,7 @@ class SvgSupport {
 	 */
 	private function __construct() {
 		add_action( 'plugins_loaded' , array( &$this , 'load_textdomain' ) );
-// 		add_action( 'init' , array( &$this , 'init' ) );
-		
+		add_action( 'init' , array( &$this , 'init' ) );
 		add_filter( 'wp_image_editors' , array( &$this , 'add_svg_editor' ) );
 		add_filter( 'mime_types', array( &$this , 'allow_svg_mime_type' ) );
 		add_filter( 'wp_generate_attachment_metadata' , array( &$this , 'svg_generate_metadata' ) , 10 , 2 );
@@ -101,7 +100,7 @@ class SvgSupport {
 			// load base class
 			_wp_image_editor_choose();
 			require_once plugin_dir_path(__FILE__) . '/include/class-wpsvg-image-editor-svg.php';
-			$file = get_attached_file( $attachment_id, true );
+			$file = get_attached_file( $post_id, true );
 			$editor = new WPSVG_Image_Editor_SVG( $file );
 			return $editor->get_size();
 		}
@@ -129,8 +128,8 @@ class SvgSupport {
 	 * @filter 'mime_types'
 	 */
 	function allow_svg_mime_type($mimes) {
-		if ( current_user_can( 'unfiltered_upload' ) )
-			$mimes['svg'] = 'image/svg+xml';
+// 		if ( current_user_can( 'unfiltered_upload' ) )
+		$mimes['svg'] = 'image/svg+xml';
 		return $mimes;
 	}
 	
