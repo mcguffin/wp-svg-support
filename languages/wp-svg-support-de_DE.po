@@ -1,0 +1,45 @@
+msgid ""
+msgstr ""
+"Project-Id-Version: WP reCaptcha Integration v1.1.0\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2015-05-23 13:51+0100\n"
+"PO-Revision-Date: 2015-05-23 13:53+0100\n"
+"Last-Translator: admin <joern@flyingletters.com>\n"
+"Language-Team: \n"
+"Language: de_DE\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=2; plural=n != 1;\n"
+"X-Generator: Poedit 1.8\n"
+"X-Poedit-SourceCharset: UTF-8\n"
+"X-Poedit-KeywordsList: __;_e;__ngettext:1,2;_n:1,2;__ngettext_noop:1,2;"
+"_n_noop:1,2;_c,_nc:4c,1,2;_x:1,2c;_ex:1,2c;_nx:4c,1,2;_nx_noop:4c,1,2\n"
+"X-Poedit-Basepath: ../\n"
+"X-Textdomain-Support: yes\n"
+"X-Poedit-SearchPath-0: .\n"
+
+#: include/class-wpsvg-image-editor-svg.php:35
+msgid "File doesn&#8217;t exist?"
+msgstr "Datei existiert nicht."
+
+#: include/class-wpsvg-image-editor-svg.php:50
+msgid "Image resize failed."
+msgstr "Anpassung der Bildgröße ist fehlgeschlagen"
+
+#: include/class-wpsvg-image-editor-svg.php:55
+msgid "Could not calculate resized image dimensions"
+msgstr "Konnte die angepasste Bildgröße nicht berechnen"
+
+#: include/class-wpsvg-image-editor-svg.php:195
+msgid "Image rotate failed."
+msgstr "Bild drehen fehlgeschlagen"
+
+#: include/class-wpsvg-image-editor-svg.php:228
+msgid "Image flip failed."
+msgstr "Bild spiegeln fehelgeschlagen"
+
+#: include/class-wpsvg-image-editor-svg.php:396
+#: include/class-wpsvg-image-editor-svg.php:401
+msgid "Image Editor Save Failed"
+msgstr "Bild speichern fehlgeschlagen"
