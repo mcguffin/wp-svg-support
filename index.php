@@ -16,7 +16,7 @@ Domain Path: /languages/
 /*  Copyright 2014  Jörn Lund
 
     This program is free software; you can redistribute it and/or modify
-    it under the terms of the GNU General Public License, version 2, as 
+    it under the terms of the GNU General Public License, version 2, as
     published by the Free Software Foundation.
 
     This program is distributed in the hope that it will be useful,
@@ -49,23 +49,39 @@ class SvgSupport {
 	 * Private constructor
 	 */
 	private function __construct() {
-		add_action( 'plugins_loaded' , array( &$this , 'load_textdomain' ) );
-		add_action( 'init' , array( &$this , 'init' ) );
-		add_filter( 'wp_image_editors' , array( &$this , 'add_svg_editor' ) );
-		add_filter( 'mime_types', array( &$this , 'allow_svg_mime_type' ) );
-		add_filter( 'wp_generate_attachment_metadata' , array( &$this , 'svg_generate_metadata' ) , 10 , 2 );
-		add_filter( 'wp_get_attachment_metadata' , array( &$this , 'svg_get_attachment_metadata' ) , 10 , 2 );
-		add_filter( 'file_is_displayable_image' , array( &$this , 'svg_is_displayable_image' ) , 10 , 2 );
-		
+		add_action( 'plugins_loaded' , array( $this, 'load_textdomain' ) );
+		add_action( 'init' , array( $this, 'init' ) );
+		add_filter( 'wp_image_editors' , array( $this, 'add_svg_editor' ) );
+		add_filter( 'mime_types', array( $this, 'allow_svg_mime_type' ) );
+		add_filter( 'wp_generate_attachment_metadata' , array( $this, 'svg_generate_metadata' ) , 10 , 2 );
+		add_filter( 'wp_get_attachment_metadata' , array( $this, 'svg_get_attachment_metadata' ) , 10 , 2 );
+		add_filter( 'file_is_displayable_image' , array( $this, 'svg_is_displayable_image' ) , 10 , 2 );
+		add_filter( 'wp_calculate_image_srcset_meta', array( $this, 'calculate_image_srcset_meta' ), 10, 4 );
+		add_filter( 'wp_calculate_image_sizes', array( $this, 'calculate_image_sizes' ), 10, 5 );
+
 		// hide unsuported features
-		add_filter( 'admin_body_class' , array( &$this , 'admin_body_class' ) );
-		add_action( 'admin_print_scripts' , array( &$this , 'admin_print_scripts' ) );
-		
+		// add_filter( 'admin_body_class' , array( $this, 'admin_body_class' ) );
+		// add_action( 'admin_print_scripts' , array( $this, 'admin_print_scripts' ) );
+
 // 		register_activation_hook( __FILE__ , array( __CLASS__ , 'activate' ) );
 // 		register_deactivation_hook( __FILE__ , array( __CLASS__ , 'deactivate' ) );
 // 		register_uninstall_hook( __FILE__ , array( __CLASS__ , 'uninstall' ) );
 	}
 
+	function calculate_image_srcset_meta( $image_meta, $size_array, $image_src, $attachment_id ) {
+		if ( 'svg' === pathinfo( $image_src, PATHINFO_EXTENSION ) ) {
+			return false;
+		}
+		return $image_meta;
+	}
+	function calculate_image_sizes( $sizes, $size, $image_src, $image_meta, $attachment_id ) {
+		
+		if ( 'svg' === pathinfo( $image_src, PATHINFO_EXTENSION ) ) {
+			return false;
+		}
+		return $sizes;
+
+	}
 	/**
 	 * Hide unsupported image editor buttons
 	 *
@@ -89,11 +105,11 @@ class SvgSupport {
 			$class .= ' edit-attachment-svg';
 		return $class;
 	}
-	
+
 	/**
 	 * @filter 'wp_get_attachment_metadata'
 	 */
-	function svg_get_attachment_metadata( $data , $post_id ) {
+	function svg_get_attachment_metadata( $data, $post_id ) {
 		if ( ! $data ) {
 			if ( !$post = get_post( $post_id ) )
 				return false;
@@ -106,11 +122,11 @@ class SvgSupport {
 		}
 		return $data;
 	}
-	
+
 	function svg_is_displayable_image( $result , $path ) {
 		return pathinfo( $path , PATHINFO_EXTENSION ) == 'svg' || $result;
 	}
-	
+
 	/**
 	 * Adds SVG Editor Class
 	 *
@@ -120,8 +136,8 @@ class SvgSupport {
 		require_once plugin_dir_path(__FILE__) . '/include/class-wpsvg-image-editor-svg.php';
 		require_once plugin_dir_path(__FILE__) . '/include/simplexml-tools.php';
 		array_unshift($editors,'WPSVG_Image_Editor_SVG');
-		return $editors; 
-	} 
+		return $editors;
+	}
 	/**
 	 * Allow SVG uploads
 	 *
@@ -132,8 +148,8 @@ class SvgSupport {
 		$mimes['svg'] = 'image/svg+xml';
 		return $mimes;
 	}
-	
-	
+
+
 	/**
 	 * Generate Metadata for SVG Uplaods
 	 *
@@ -145,7 +161,7 @@ class SvgSupport {
 			// get file source
 			$file = get_attached_file( $attachment_id );
 			$updir = wp_upload_dir();
-			$file_in_updir = str_replace(trailingslashit($updir['basedir']),'',$file);
+			$file_in_updir = str_replace( trailingslashit( $updir['basedir']), '', $file );
 			if ( file_exists( $file ) ) {
 				$xml = simplexml_load_file($file );
 				$xml_attr = $xml[0]->attributes();
@@ -162,7 +178,7 @@ class SvgSupport {
 					foreach( get_intermediate_image_sizes() as $s ) {
 						// as svg files scale seamlessly the file array element should be just our source svg filename.
 						$sizes[$s] = array( 'width' => '', 'height' => '', 'crop' => false , 'file' => pathinfo($file_in_updir , PATHINFO_BASENAME ) );
-					
+
 						// BEGIN copy-pasted from wp-admin/includes/image.php function wp_generate_attachment_metadata()
 						if ( isset( $_wp_additional_image_sizes[$s]['width'] ) )
 							$sizes[$s]['width'] = intval( $_wp_additional_image_sizes[$s]['width'] ); // For theme-added sizes
@@ -222,4 +238,3 @@ class SvgSupport {
 SvgSupport::get_instance();
 
 endif;
-

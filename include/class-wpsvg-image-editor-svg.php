@@ -4,7 +4,7 @@ class WPSVG_Image_Editor_SVG extends WP_Image_Editor {
 	protected $default_mime_type = 'image/svg+xml';
 	private $xml_document;
 	private $transform_group;
-	
+
 	/*
 	resize					OK
 	crop 					OK
@@ -12,12 +12,12 @@ class WPSVG_Image_Editor_SVG extends WP_Image_Editor {
 	crop -> resize			OK
 	resize -> crop 			OK
 	crop -> resize -> crop	OK
-	
+
 	flip					-
 	rotate					-
-	
+
 	*/
-	
+
 	public static function test( $args = array() ) {
 		// check if xml extension is loaded
 		return function_exists('simplexml_load_file');
@@ -26,20 +26,21 @@ class WPSVG_Image_Editor_SVG extends WP_Image_Editor {
 		$inst = new self('');
 		return $mime_type == $inst->default_mime_type;
 	}
-	
+
 	public function load() {
 		if ( $this->xml_document )
 			return true;
-		
+
 		if ( ! is_file( $this->file ) && ! preg_match( '|^https?://|', $this->file ) )
 			return new WP_Error( 'error_loading_image', __('File doesn&#8217;t exist?'), $this->file );
 
 		$this->xml_document = simplexml_load_file( $this->file );
 		$this->xml_document->registerXPathNamespace('svg', 'http://www.w3.org/2000/svg');
-		
+
 		$this->update_size( );
 	//	$this->get_transform_group();
 	}
+
 	public function resize( $max_w, $max_h, $crop = false ) {
 		if ( ( $this->size['width'] == $max_w ) && ( $this->size['height'] == $max_h ) )
 			return true;
@@ -56,9 +57,9 @@ class WPSVG_Image_Editor_SVG extends WP_Image_Editor {
 		}
 		// crop this
 		// resize this
-		
+
 		list( $dst_x, $dst_y, $src_x, $src_y, $dst_w, $dst_h, $src_w, $src_h ) = $dims;
-		
+
 		if ( $crop ) {
 			$this->crop( $src_x, $src_y, $src_w, $src_h, $dst_w, $dst_h, $src_abs = false );
  		} else {
@@ -125,7 +126,7 @@ class WPSVG_Image_Editor_SVG extends WP_Image_Editor {
 
 		return $metadata;
 	}
-	
+
 	/**
 	 * Crops Image.
 	 *
@@ -148,34 +149,34 @@ class WPSVG_Image_Editor_SVG extends WP_Image_Editor {
 			$src_h -= $src_y;
 		}
 		// add transform from values
-		
+
 		$viewbox = $this->get_viewbox();
-		
+
 		$original_size = $this->size;
-		
+
 		$factor = $viewbox->width / $original_size['width'];
-		
+
 		$this->_resize( $viewbox->width , $viewbox->height , false );
-		
+
 		$viewbox->x += $src_x*$factor;
 		$viewbox->y += $src_y*$factor;
 		$viewbox->width = $src_w*$factor;
 		$viewbox->height = $src_h*$factor;
 
 		$this->set_viewbox( $viewbox );
-		
+
 		$this->xml_document[0]['width']  = ( ! is_null($dst_w) ? $dst_w : $src_w ) . 'px';
 		$this->xml_document[0]['height'] = ( ! is_null($dst_h) ? $dst_h : $src_h )  . 'px';
-		
+
 		$this->_resize( $original_size['width'] , $original_size['height'] , false );
 
 		$this->update_size( );
 
 		return true;
-		
+
 		//return new WP_Error( 'image_crop_error', __('Image crop failed.'), $this->file );
 	}
-	
+
 	/**
 	 * Rotates current image counter-clockwise by $angle.
 	 * Ported from image-edit.php
@@ -189,12 +190,12 @@ class WPSVG_Image_Editor_SVG extends WP_Image_Editor {
 	public function rotate( $angle ) {
 	/*
 		list( $prev_x , $prev_y , $prev_w , $prev_h ) = explode( ' ' , $this->xml_document[0]['viewBox'] );
-		
+
 		//$this->xml_document[0]['viewBox'] = implode(' ',$vb);
-	*/	
+	*/
 		return new WP_Error( 'image_rotate_error', __('Image rotate failed.'), $this->file );
 	}
-	
+
 	/**
 	 * Flips current image.
 	 *
@@ -250,13 +251,21 @@ class WPSVG_Image_Editor_SVG extends WP_Image_Editor {
 	 * @param int $height
 	 */
 	protected function update_size( $width = null, $height = null ) {
+		// read from xml attr
 		if ( !$width || !$height ) {
 			$width  = floatval($this->xml_document[0]['width']);
 			$height = floatval($this->xml_document[0]['height']);
 		}
+		// calc from viewbox
+		if ( !$width || !$height ) {
+			$viewbox = $this->xml_document[0]['viewBox'];
+			@list( $x, $y, $width, $height)  = explode( ' ', $viewbox );
+			$width = floatval( $width );
+			$height = floatval( $height );
+		}
 		parent::update_size( $width , $height );
 	}
-	
+
 	private function get_viewbox(){
 		list($x , $y , $width , $height ) = explode( ' ' , $this->xml_document[0]['viewBox'] );
 		return (object) array(
@@ -270,9 +279,9 @@ class WPSVG_Image_Editor_SVG extends WP_Image_Editor {
 		$vb = array( $viewbox->x , $viewbox->y , $viewbox->width , $viewbox->height );
 		$this->xml_document[0]['viewBox'] = implode( ' ' , $vb );
 	}
-	
+
 	/*
-	
+
 	private function set_transform( $transform ) {
 		$old_transform = $this->get_transform();
 		foreach ( get_object_vars( $old_transform ) as $key => $values ) {
@@ -283,12 +292,12 @@ class WPSVG_Image_Editor_SVG extends WP_Image_Editor {
 					$transform->$key->$dim = $old_transform->$key->$dim;
 			}
 		}
-		
+
 		$transforms = array();
 		$transforms[] = sprintf( 'translate(%f,%f)' , $transform->translate->x , $transform->translate->y );
 		$transforms[] = sprintf( 'scale(%f,%f)'     , $transform->scale->x , $transform->scale->y );
 		$transforms[] = sprintf( 'rotate(%f,%f,%f)' , $transform->rotate->angle , $transform->rotate->x0 , $transform->rotate->y0 );
-		
+
 		$transform_group = $this->get_transform_group();
 		$transform_group['transform'] = implode( ' ' , $transforms );
 	}
@@ -312,7 +321,7 @@ class WPSVG_Image_Editor_SVG extends WP_Image_Editor {
 			),
 		);
 		$transform_str = strval($transform_group['transform']);
-		
+
 		// scale
 		$scale_matches = array();
 		preg_match('/scale\((-?[\d\.]+)(,(-?[\d\.]+))?\)/',$transform_str,$scale_matches);
@@ -336,7 +345,7 @@ class WPSVG_Image_Editor_SVG extends WP_Image_Editor {
 				$transform->translate->y = $transform->translate->x;
 			}
 		}
-		
+
 		$rotate_matches = array();
 		preg_match('/rotate\((-?[\d\.]+)(,(-?[\d\.]+),(-?[\d\.]+))?\)/',$transform_str,$rotate_matches);
 		if ( isset($rotate_matches[1]) ) {
@@ -390,11 +399,11 @@ class WPSVG_Image_Editor_SVG extends WP_Image_Editor {
 		if ( $this->default_mime_type == $mime_type ) {
 
 			wp_mkdir_p( dirname( $filename ) );
-			
+
 			$fp = fopen( $filename, 'w' );
 			if ( ! $fp )
 				return new WP_Error( 'image_save_error', __('Image Editor Save Failed') );
-				
+
 			fwrite( $fp, $image->asXML() );
 			fclose( $fp );
 		} else {
