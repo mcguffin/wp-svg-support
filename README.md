@@ -1,6 +1,9 @@
 WP SVG Support
 ===============
 
+**Notice: ** This repository is no longer being maintained.  
+[SVG Support](https://de.wordpress.org/plugins/svg-support/) at wp.org is a good alternative.
+
 Upload and edit SVG files in WordPress.
 
 The plugin aims to implement a full featured SVG Editor that would work the same like the regular Image 
